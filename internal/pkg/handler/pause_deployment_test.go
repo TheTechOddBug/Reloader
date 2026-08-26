@@ -179,6 +179,18 @@ func TestParsePauseDuration(t *testing.T) {
 			expectedDuration:   0,
 			invalidDuration:    true,
 		},
+		{
+			name:               "zero duration",
+			pauseIntervalValue: "0s",
+			expectedDuration:   0,
+			invalidDuration:    true,
+		},
+		{
+			name:               "negative duration",
+			pauseIntervalValue: "-5m",
+			expectedDuration:   0,
+			invalidDuration:    true,
+		},
 	}
 
 	for _, test := range tests {
