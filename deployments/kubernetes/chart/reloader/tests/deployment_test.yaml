@@ -159,15 +159,12 @@ tests:
         leaderElection:
           leaseDuration: 30s
     asserts:
-      - contains:
+      - equal:
           path: spec.template.spec.containers[0].args
-          content: "--leader-election-lease-duration=30s"
-      - notContains:
-          path: spec.template.spec.containers[0].args
-          content: "--leader-election-renew-deadline="
-      - notContains:
-          path: spec.template.spec.containers[0].args
-          content: "--leader-election-retry-period="
+          value:
+            - "--log-level=info"
+            - "--enable-ha=true"
+            - "--leader-election-lease-duration=30s"
 
   - it: does not set leader election arguments when enableHA is false
     set:
@@ -178,30 +175,21 @@ tests:
           renewDeadline: 20s
           retryPeriod: 4s
     asserts:
-      - notContains:
+      - equal:
           path: spec.template.spec.containers[0].args
-          content: "--leader-election-lease-duration=30s"
-      - notContains:
-          path: spec.template.spec.containers[0].args
-          content: "--leader-election-renew-deadline=20s"
-      - notContains:
-          path: spec.template.spec.containers[0].args
-          content: "--leader-election-retry-period=4s"
+          value:
+            - "--log-level=info"
 
   - it: keeps the client-go defaults by not setting leader election arguments when enableHA is true and no timings are configured
     set:
       reloader:
         enableHA: true
     asserts:
-      - notContains:
+      - equal:
           path: spec.template.spec.containers[0].args
-          content: "--leader-election-lease-duration="
-      - notContains:
-          path: spec.template.spec.containers[0].args
-          content: "--leader-election-renew-deadline="
-      - notContains:
-          path: spec.template.spec.containers[0].args
-          content: "--leader-election-retry-period="
+          value:
+            - "--log-level=info"
+            - "--enable-ha=true"
 
   - it: template is still valid when leaderElection is null
     set:

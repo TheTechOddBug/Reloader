@@ -166,11 +166,25 @@ helm uninstall {{RELEASE_NAME}} -n {{NAMESPACE}}
 ❌ Updates during leader downtime are missed
 ⏳ Potential 15s delay window (default `LeaseDuration`)
 
+#### 🗳️ `enableHA` Behavior
+**When true:**
+✅ `--enable-ha=true` and the `POD_NAME`/`POD_NAMESPACE` env vars are rendered
+✅ The `coordination.k8s.io` Lease RBAC is rendered when `reloader.rbac.enabled` is `true`
+✅ The default pod anti-affinity is rendered unless custom affinity is configured
+✅ `reloader.deployment.replicas` is honored, and any `reloader.leaderElection.*` timings are passed to the binary
+
+**When false:**
+❌ `reloader.deployment.replicas` is clamped to `1`, whatever value is set
+❌ `reloader.leaderElection.*` timings are ignored
+
+> ⚠️ **Behavior change:** earlier chart versions emitted `--enable-ha=true` whenever `reloader.deployment.replicas > 1`, even with `reloader.enableHA: false`. Every other HA component stayed gated on `enableHA` alone, so the pod rendered without `POD_NAME` and the binary exited with `POD_NAME not set, cannot run in HA mode without POD_NAME set`, leaving it in `CrashLoopBackOff`. The flag is now gated on `enableHA` alone. Raising `replicas` by itself therefore leaves HA off, consistent with the existing replica clamp. Setting `reloader.enableHA: true` is unaffected.
+
 #### Default Settings
 ⚠️ All flags default to `false` (must be enabled explicitly):
 - `reloadOnCreate`
 - `reloadOnDelete`
 - `syncAfterRestart`
+- `enableHA`
 
 ### Deprecation Notice
 - `serviceMonitor` will be removed in future releases in favor of `PodMonitor`
