@@ -59,6 +59,11 @@ func ParsePauseDuration(pauseIntervalValue string) (time.Duration, error) {
 		logrus.Warnf("Failed to parse pause interval value '%s': %v", pauseIntervalValue, err)
 		return 0, err
 	}
+	if pauseDuration <= 0 {
+		err = fmt.Errorf("pause interval must be positive, got '%s'", pauseIntervalValue)
+		logrus.Warn(err)
+		return 0, err
+	}
 	return pauseDuration, nil
 }
 
