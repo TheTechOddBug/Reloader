@@ -1,7 +1,9 @@
 package common
 
 import (
+	"encoding/json"
 	"testing"
+	"time"
 
 	"github.com/stakater/Reloader/internal/pkg/options"
 )
@@ -273,5 +275,38 @@ func TestShouldReload_InvalidRegexAnnotation_SkipsMalformedPattern(t *testing.T)
 	}
 	if len(result.Errors) != 1 {
 		t.Errorf("Expected the malformed pattern to surface 1 error, got=%d: %v", len(result.Errors), result.Errors)
+	}
+}
+
+func TestGetCommandLineOptions_LeaderElectionTimingsAreDurationStrings(t *testing.T) {
+	origLease, origRenew, origRetry := options.LeaderElectionLeaseDuration, options.LeaderElectionRenewDeadline, options.LeaderElectionRetryPeriod
+	defer func() {
+		options.LeaderElectionLeaseDuration, options.LeaderElectionRenewDeadline, options.LeaderElectionRetryPeriod = origLease, origRenew, origRetry
+	}()
+	options.LeaderElectionLeaseDuration = 30 * time.Second
+	options.LeaderElectionRenewDeadline = 20 * time.Second
+	options.LeaderElectionRetryPeriod = 4 * time.Second
+
+	// the meta-info ConfigMap holds the marshalled options, so the timings must
+	// read as durations there rather than as raw nanoseconds
+	encoded, err := json.Marshal(GetCommandLineOptions())
+	if err != nil {
+		t.Fatalf("Expected the options to marshal, got err=%v", err)
+	}
+
+	decoded := map[string]any{}
+	if err := json.Unmarshal(encoded, &decoded); err != nil {
+		t.Fatalf("Expected the options to unmarshal, got err=%v", err)
+	}
+
+	expected := map[string]string{
+		"leaderElectionLeaseDuration": "30s",
+		"leaderElectionRenewDeadline": "20s",
+		"leaderElectionRetryPeriod":   "4s",
+	}
+	for key, want := range expected {
+		if got := decoded[key]; got != want {
+			t.Errorf("Expected %s=%q, got=%#v", key, want, got)
+		}
 	}
 }

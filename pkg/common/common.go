@@ -80,6 +80,12 @@ type ReloaderOptions struct {
 	SyncAfterRestart bool `json:"syncAfterRestart"`
 	// EnableHA indicates whether High Availability mode is enabled with leader election
 	EnableHA bool `json:"enableHA"`
+	// LeaderElectionLeaseDuration is the duration non-leader candidates wait before force acquiring leadership, formatted as a Go duration string
+	LeaderElectionLeaseDuration string `json:"leaderElectionLeaseDuration"`
+	// LeaderElectionRenewDeadline is the duration the acting leader retries refreshing leadership before giving up, formatted as a Go duration string
+	LeaderElectionRenewDeadline string `json:"leaderElectionRenewDeadline"`
+	// LeaderElectionRetryPeriod is the duration clients wait between attempting acquisition and renewal of leadership, formatted as a Go duration string
+	LeaderElectionRetryPeriod string `json:"leaderElectionRetryPeriod"`
 	// EnableCSIIntegration indicates whether CSI integration is enabled to watch SecretProviderClassPodStatus
 	EnableCSIIntegration bool `json:"enableCSIIntegration"`
 	// WebhookUrl is the URL to send webhook notifications to instead of performing reloads
@@ -366,6 +372,9 @@ func GetCommandLineOptions() *ReloaderOptions {
 	CommandLineOptions.ReloadStrategy = options.ReloadStrategy
 	CommandLineOptions.SyncAfterRestart = options.SyncAfterRestart
 	CommandLineOptions.EnableHA = options.EnableHA
+	CommandLineOptions.LeaderElectionLeaseDuration = options.LeaderElectionLeaseDuration.String()
+	CommandLineOptions.LeaderElectionRenewDeadline = options.LeaderElectionRenewDeadline.String()
+	CommandLineOptions.LeaderElectionRetryPeriod = options.LeaderElectionRetryPeriod.String()
 	CommandLineOptions.EnableCSIIntegration = options.EnableCSIIntegration
 	CommandLineOptions.WebhookUrl = options.WebhookUrl
 	CommandLineOptions.ResourcesToIgnore = options.ResourcesToIgnore
